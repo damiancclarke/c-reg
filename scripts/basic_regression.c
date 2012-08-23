@@ -39,4 +39,6 @@ int main(int argc, char *argv[])
 	beta = 1/xx;
 	beta = beta*xy;
 	printf("beta is %e:\n ", beta);
+
+	return 0;
 }

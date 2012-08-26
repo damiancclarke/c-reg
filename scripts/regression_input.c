@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <math.h>
-float detrm(float[100][100], float);
-void cofact(float[100][100], float);
-void trans(float[100][100], float[100][100], float);
-void reg(float[100][100], float[100][100], float, int);
+float detrm(float[100][100], float, float[100], int);
+void cofact(float[100][100], float, float[100], int);
+void trans(float[100][100], float[100][100], float, float[100], int);
 //void inv(float[100][100]);
 
 int main()
@@ -15,7 +14,7 @@ int main()
 	float xx[100][100], xy[100];
 
 	//Enter x variables
-	printf("Enter the number of observations and variables of XXXX\n");
+	printf("Enter the number of observations and variables of X\n");
 	scanf("%f%f", &obs_x, &vars_x);
 	printf("Enter the variables\n");
 
@@ -32,9 +31,6 @@ int main()
 									 		}
 										printf("\n");
 										}
-
-
-
 
 
 	//Enter y variable 
@@ -119,19 +115,19 @@ int main()
 		}
 
 		
-		//	Calculate the inverse of the matrix.  Under construction.
+		// Calculate the inverse of the matrix.  Under construction.
+		// Calculate vectors of regression coefficients
+		// Finally print out coefficients of the regression
 		float d;
-		d = detrm(xx, vars_x);
+		d = detrm(xx, vars_x,  xy, rows_trans);
 		printf( "The determinant is = %f", d );
  
 		if (d == 0)
 			printf( "\nMatrix is not invertible\n" );
 		else
-			cofact(xx , vars_x);				
+			cofact(xx , vars_x, xy, rows_trans);				
 
 
-		//Calculate vectors of regression coefficients
-		reg(inv, xy, obs_x, rows_trans);
 	}
 	
 	return 0;
@@ -144,7 +140,7 @@ int main()
 Function to find the determinant of the matrix
 *******************************************************************************/
  
-float detrm(float xx[100][100], float vars_x)
+float detrm(float xx[100][100], float vars_x, float xy[100], int rows_trans)
 {
 	float s = 1, det = 0, b[100][100];
 	int k, j, m, n, c;
@@ -185,7 +181,7 @@ float detrm(float xx[100][100], float vars_x)
 								}
 						}
 
-						det = det + s *( xx[0][c] * detrm(b, x1));
+						det = det + s *( xx[0][c] * detrm(b, x1, xy, rows_trans));
 						s = -1 * s;
 				}
 		}
@@ -196,7 +192,7 @@ float detrm(float xx[100][100], float vars_x)
 /*******************************************************************************
 Function to find the cofactor of the matrix
 *******************************************************************************/
-void cofact(float num[100][100], float f)
+void cofact(float num[100][100], float f, float xy[100], int rows_trans)
 {
 	float b[100][100], fac[100][100];
 	int p, q, m, n, k, j;
@@ -231,22 +227,23 @@ void cofact(float num[100][100], float f)
 								}
 						}
 
-					fac[q][p] = pow(-1, q + p) * detrm(b, f1);
+					fac[q][p] = pow(-1, q + p) * detrm(b, f1, xy, rows_trans);
 			}
 		}
 
-	trans( num, fac, f );
+	trans( num, fac, f, xy, rows_trans);
 }
  
 /*******************************************************************************
 Function to find the transpose and inverse of the matrix
 *******************************************************************************/
  
-void trans(float num[100][100], float fac[100][100], float r)
+void trans(float num[100][100], float fac[100][100], float r, float xy[100], int rows_trans)
 
 {
 	int k, j;
-	float b[100][100], inv[100][100], d;
+	float b[100][100], inv[100][100], beta[100], d;
+	float sum = 0;
 
 	for (k = 0; k < r; k++)
 		{
@@ -256,7 +253,7 @@ void trans(float num[100][100], float fac[100][100], float r)
 				}
 		}
 
-	d = detrm(num, r);
+	d = detrm(num, r, xy, rows_trans);
 	inv[k][j] = 0;
 
 	for (k = 0; k < r; k++)
@@ -278,34 +275,26 @@ void trans(float num[100][100], float fac[100][100], float r)
 
 			printf( "\n" );
 		}
-}
 
 
-/*******************************************************************************
-Function to find the regression coefficients
-*******************************************************************************/
-void reg(float inv[100][100], float xy[100][100], float obs_x, int rows_trans)
 
-{
-	float beta[100];
-	int i = 0;
-
-
-	for (rows_trans = 0; rows_trans < obs_x; rows_trans++)
-	{
-		for (i = 0; i < vars_x; i++)
+		//Calculate vectors of regression coefficients
+		for (rows_trans = 0; rows_trans < r; rows_trans++)
 		{
-			sum = sum + inv[rows_trans][i]*y[i];
-		} 
-	beta[rows_trans] = sum;
-	sum = 0;
-	}
+			for (k = 0; k < r; k++)
+			{
+				sum = sum + inv[rows_trans][k]*xy[k];
+			} 
+		beta[rows_trans] = sum;
+		sum = 0;
+		}
 
-	//Finally print out coefficients of the regression
-	printf("Regression Coefficients:\n");
-	for (rows_trans = 0; rows_trans < vars_x; rows_trans++)
-	{
-		printf("%f ", beta[rows_trans]);
-		printf("\n");
-	}
+		//Finally print out coefficients of the regression
+		printf("Regression Coefficients:\n");
+		for (rows_trans = 0; rows_trans < r; rows_trans++)
+		{
+			printf("%f ", beta[rows_trans]);
+			printf("\n");
+		}
+
 }

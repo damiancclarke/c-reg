@@ -1,0 +1,30 @@
+\begin{thebibliography}{3}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Aldrich et~al.(2011)Aldrich, Fernández-Villaverde, Ronald~Gallant,
+  and Rubio-Ramírez]{aldrich2011}
+E.~M. Aldrich, J.~Fernández-Villaverde, A.~Ronald~Gallant, and J.~F.
+  Rubio-Ramírez.
+\newblock Tapping the supercomputer under your desk: Solving dynamic
+  equilibrium models with graphics processors.
+\newblock \emph{Journal of Economic Dynamics and Control}, 35\penalty0
+  (3):\penalty0 386--393, March 2011.
+\newblock URL
+  \url{http://ideas.repec.org/a/eee/dyncon/v35y2011i3p386-393.html}.
+
+\bibitem[{Sala-i-Martin}(1997)]{SalaiMartin1997}
+X.~{Sala-i-Martin}.
+\newblock I just ran two million regressions.
+\newblock \emph{American Economic Review}, 87\penalty0 (2):\penalty0 178--83,
+  May 1997.
+
+\bibitem[Vespignani(2011)]{vespignani2011modelling}
+A.~Vespignani.
+\newblock Modelling dynamical processes in complex socio-technical systems.
+\newblock \emph{Nature Physics}, 8\penalty0 (1):\penalty0 32--39, 2011.
+
+\end{thebibliography}

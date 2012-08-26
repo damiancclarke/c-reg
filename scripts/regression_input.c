@@ -1,9 +1,13 @@
+//This program runs a multilinear regression with variables specified by the
+//user.  This program should be treated as a work in progress.
+//Comments or questions should be directed to Damian C. Clarke:
+// damian.clarke@economics.ox.ax.uk or damian.c.clarke@gmail.com
 #include <stdio.h>
 #include <math.h>
 float detrm(float[100][100], float, float[100], int);
 void cofact(float[100][100], float, float[100], int);
 void trans(float[100][100], float[100][100], float, float[100], int);
-//void inv(float[100][100]);
+void reg(float r, float xy[100], int rows_trans, float inv[100][100]);
 
 int main()
 {
@@ -22,15 +26,15 @@ int main()
 		for (rows = 0 ; rows < obs_x ; rows++)
 			scanf("%f", &x[cols][rows]);
 
-										printf("print X:\n");
-										for (rows = 0; rows < obs_x; rows++)
-										{
-											for (cols = 0; cols < vars_x; cols++)
-											{
-												printf("%f ", x[cols][rows]);
-									 		}
-										printf("\n");
-										}
+	printf("print X:\n");
+	for (rows = 0; rows < obs_x; rows++)
+		{
+		for (cols = 0; cols < vars_x; cols++)
+			{
+				printf("%f ", x[cols][rows]);
+	 		}
+			printf("\n");
+		}
 
 
 	//Enter y variable 
@@ -115,7 +119,7 @@ int main()
 		}
 
 		
-		// Calculate the inverse of the matrix.  Under construction.
+		// Calculate the inverse of the matrix.
 		// Calculate vectors of regression coefficients
 		// Finally print out coefficients of the regression
 		float d;
@@ -126,8 +130,6 @@ int main()
 			printf( "\nMatrix is not invertible\n" );
 		else
 			cofact(xx , vars_x, xy, rows_trans);				
-
-
 	}
 	
 	return 0;
@@ -199,9 +201,9 @@ void cofact(float num[100][100], float f, float xy[100], int rows_trans)
 	float f1 = f - 1;
 	float f2 = f - 2;
 
-	for (q = 0; q < f; q++ )
+	for (q = 0; q < f; q++)
 		{
-			for ( p = 0;p < f;p++ )
+			for (p = 0; p < f; p++)
 				{
 					m = 0;
 					n = 0;
@@ -231,19 +233,17 @@ void cofact(float num[100][100], float f, float xy[100], int rows_trans)
 			}
 		}
 
-	trans( num, fac, f, xy, rows_trans);
+	trans(num, fac, f, xy, rows_trans);
 }
  
 /*******************************************************************************
 Function to find the transpose and inverse of the matrix
 *******************************************************************************/
- 
 void trans(float num[100][100], float fac[100][100], float r, float xy[100], int rows_trans)
 
 {
 	int k, j;
-	float b[100][100], inv[100][100], beta[100], d;
-	float sum = 0;
+	float b[100][100], d, inv[100][100];
 
 	for (k = 0; k < r; k++)
 		{
@@ -276,25 +276,37 @@ void trans(float num[100][100], float fac[100][100], float r, float xy[100], int
 			printf( "\n" );
 		}
 
+		reg(r, xy, rows_trans, inv);
+
+}
 
 
-		//Calculate vectors of regression coefficients
-		for (rows_trans = 0; rows_trans < r; rows_trans++)
+/*******************************************************************************
+Function to multiply inv(X'X) with X'y
+*******************************************************************************/
+void reg(float r, float xy[100], int rows_trans, float inv[100][100])
+{
+	
+	int k;
+	float sum = 0;	
+	float beta[100];
+	
+	//Calculate vectors of regression coefficients
+	for (rows_trans = 0; rows_trans < r; rows_trans++)
+	{
+		for (k = 0; k < r; k++)
 		{
-			for (k = 0; k < r; k++)
-			{
-				sum = sum + inv[rows_trans][k]*xy[k];
-			} 
-		beta[rows_trans] = sum;
-		sum = 0;
-		}
+			sum = sum + inv[rows_trans][k]*xy[k];
+		} 
+	beta[rows_trans] = sum;
+	sum = 0;
+	}
 
-		//Finally print out coefficients of the regression
-		printf("Regression Coefficients:\n");
-		for (rows_trans = 0; rows_trans < r; rows_trans++)
-		{
-			printf("%f ", beta[rows_trans]);
-			printf("\n");
-		}
-
+	//Finally print out coefficients of the regression
+	printf("Regression Coefficients:\n");
+	for (rows_trans = 0; rows_trans < r; rows_trans++)
+	{
+		printf("%f ", beta[rows_trans]);
+		printf("\n");
+	}
 }

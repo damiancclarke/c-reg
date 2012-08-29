@@ -4,10 +4,11 @@
 // damian.clarke@economics.ox.ax.uk or damian.c.clarke@gmail.com
 #include <stdio.h>
 #include <math.h>
-float detrm(float[100][100], float, float[100], int);
-void cofact(float[100][100], float, float[100], int);
-void trans(float[100][100], float[100][100], float, float[100], int);
-void reg(float r, float xy[100], int rows_trans, float inv[100][100]);
+float detrm(float[100][100], float, float[100], int, float, float[100][100], float[100]);
+void cofact(float[100][100], float, float[100], int, float, float[100][100], float[100]);
+void trans(float[100][100], float[100][100], float, float[100], int, float, float[100][100], float[100]);
+float reg(float, float[100], int, float[100][100], float, float[100][100], float[100]);
+void stderror(float, float[100], float, float[100][100], float[100], float[100][100]);
 
 int main()
 {
@@ -123,15 +124,16 @@ int main()
 		// Calculate vectors of regression coefficients
 		// Finally print out coefficients of the regression
 		float d;
-		d = detrm(xx, vars_x,  xy, rows_trans);
+		d = detrm(xx, vars_x,  xy, rows_trans, obs_x, x, y);
 		printf( "The determinant is = %f", d );
  
 		if (d == 0)
 			printf( "\nMatrix is not invertible\n" );
 		else
-			cofact(xx , vars_x, xy, rows_trans);				
+			cofact(xx , vars_x, xy, rows_trans, obs_x, x, y);				
+
 	}
-	
+
 	return 0;
 }
 
@@ -142,7 +144,7 @@ int main()
 Function to find the determinant of the matrix
 *******************************************************************************/
  
-float detrm(float xx[100][100], float vars_x, float xy[100], int rows_trans)
+float detrm(float xx[100][100], float vars_x, float xy[100], int rows_trans, float obs_x, float x[100][100], float y[100])
 {
 	float s = 1, det = 0, b[100][100];
 	int k, j, m, n, c;
@@ -183,7 +185,7 @@ float detrm(float xx[100][100], float vars_x, float xy[100], int rows_trans)
 								}
 						}
 
-						det = det + s *( xx[0][c] * detrm(b, x1, xy, rows_trans));
+						det = det + s *( xx[0][c] * detrm(b, x1, xy, rows_trans, obs_x, x, y));
 						s = -1 * s;
 				}
 		}
@@ -194,7 +196,7 @@ float detrm(float xx[100][100], float vars_x, float xy[100], int rows_trans)
 /*******************************************************************************
 Function to find the cofactor of the matrix
 *******************************************************************************/
-void cofact(float num[100][100], float f, float xy[100], int rows_trans)
+void cofact(float num[100][100], float f, float xy[100], int rows_trans, float obs_x, float x[100][100], float y[100])
 {
 	float b[100][100], fac[100][100];
 	int p, q, m, n, k, j;
@@ -229,17 +231,17 @@ void cofact(float num[100][100], float f, float xy[100], int rows_trans)
 								}
 						}
 
-					fac[q][p] = pow(-1, q + p) * detrm(b, f1, xy, rows_trans);
+					fac[q][p] = pow(-1, q + p) * detrm(b, f1, xy, rows_trans, obs_x, x, y);
 			}
 		}
 
-	trans(num, fac, f, xy, rows_trans);
+	trans(num, fac, f, xy, rows_trans, obs_x, x, y);
 }
  
 /*******************************************************************************
 Function to find the transpose and inverse of the matrix
 *******************************************************************************/
-void trans(float num[100][100], float fac[100][100], float r, float xy[100], int rows_trans)
+void trans(float num[100][100], float fac[100][100], float r, float xy[100], int rows_trans, float obs_x, float x[100][100], float y[100])
 
 {
 	int k, j;
@@ -253,7 +255,7 @@ void trans(float num[100][100], float fac[100][100], float r, float xy[100], int
 				}
 		}
 
-	d = detrm(num, r, xy, rows_trans);
+	d = detrm(num, r, xy, rows_trans, obs_x, x, y);
 	inv[k][j] = 0;
 
 	for (k = 0; k < r; k++)
@@ -276,7 +278,7 @@ void trans(float num[100][100], float fac[100][100], float r, float xy[100], int
 			printf( "\n" );
 		}
 
-		reg(r, xy, rows_trans, inv);
+		reg(r, xy, rows_trans, inv, obs_x, x, y);
 
 }
 
@@ -284,7 +286,7 @@ void trans(float num[100][100], float fac[100][100], float r, float xy[100], int
 /*******************************************************************************
 Function to multiply inv(X'X) with X'y
 *******************************************************************************/
-void reg(float r, float xy[100], int rows_trans, float inv[100][100])
+float reg(float r, float xy[100], int rows_trans, float inv[100][100], float obs_x, float x[100][100], float y[100])
 {
 	
 	int k;
@@ -309,4 +311,61 @@ void reg(float r, float xy[100], int rows_trans, float inv[100][100])
 		printf("%f ", beta[rows_trans]);
 		printf("\n");
 	}
+	stderror(r, beta, obs_x, x, y, inv);
+	return beta[rows_trans];
 }
+
+
+/*******************************************************************************
+Function to calculate sigma squared (for standard errors).  Very parallelizable.
+*******************************************************************************/
+//u=y-XB // float xy[100]?, float inv[100][100],
+void stderror(float r, float beta[100], float obs_x, float x[100][100], float y[100], float inv[100][100])
+{
+	int i, j = 0;
+	float xbi, ubar, sigma = 0;
+	float xb[100], ui[100], se[100];
+
+	//(1) Calculate x_i'B and ui
+	for(i = 0; i < obs_x; i++)
+	{
+		for (j = 0; j < r; j++)
+		{	
+			xbi = xbi + beta[j]*x[j][i];
+		}
+		xb[i] = xbi;
+		printf("X'B: %f \n", xb[i]);
+		ui[i] = y[i] - xb[i];
+		printf("ui: %f \n", ui[i]);
+	}
+
+
+	//(2) Calculate u_bar
+	for(i = 0; i < obs_x; i++)
+	{
+		ubar = ubar + ui[i];
+	}
+	ubar = ubar / obs_x;
+
+	//(3) Calculate var(u)
+	for(i = 0; i < obs_x; i++)
+	{
+		sigma = sigma + pow((ui[i]-ubar), 2);
+	}
+	sigma = sigma / obs_x;
+
+	//(4) Calculate std. errors
+	for (j = 0; j < r; j++)
+	{	
+		se[j] = sigma * inv[j][j];
+	}		
+
+	//(5) Print std. errors
+	printf("Standard Errors:\n");
+	for (j = 0; j < r; j++)
+	{
+		printf("%f ", se[j]);
+		printf("\n");
+	}
+}
+

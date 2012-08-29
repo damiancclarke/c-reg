@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
+The top-level auxiliary file: parallelcomputing.aux
+The style file: abbrvnat.bst
+Database file #1: bibliography.bib.bib
+You're missing a field part---line 73 of file bibliography.bib.bib
+ :   month= 
+ :          ,
+I'm skipping whatever remains of this entry
+You've used 3 entries,
+            2773 wiz_defined-function locations,
+            616 strings with 5177 characters,
+and the built_in function-call counts, 1352 in all, are:
+= -- 122
+> -- 59
+< -- 2
++ -- 21
+- -- 18
+* -- 116
+:= -- 213
+add.period$ -- 10
+call.type$ -- 3
+change.case$ -- 15
+chr.to.int$ -- 3
+cite$ -- 6
+duplicate$ -- 61
+empty$ -- 119
+format.name$ -- 21
+if$ -- 275
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 3
+newline$ -- 24
+num.names$ -- 12
+pop$ -- 25
+preamble$ -- 1
+purify$ -- 12
+quote$ -- 0
+skip$ -- 41
+stack$ -- 0
+substring$ -- 68
+swap$ -- 5
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 33
+warning$ -- 0
+while$ -- 14
+width$ -- 0
+write$ -- 48
+(There was 1 error message)

@@ -1,0 +1,148 @@
+\documentclass{article}[11pt,subeqn]
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage[pdftex]{graphicx}
+\usepackage{setspace}
+\usepackage{framed}
+%\usepackage{lastpage}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+
+\title{We Just Ran Two Million Regressions Faster}
+\author{Damian C. Clarke \and George Vega Yon}
+
+
+\setlength\topmargin{-0.375in}
+\setlength\headheight{20pt}
+\setlength\headwidth{5.8in}
+\setlength\textheight{8.8in}
+\setlength\textwidth{5.8in}
+\setlength\oddsidemargin{0.4in}
+\setlength\evensidemargin{-0.5in}
+\setlength\parindent{0.25in}
+\setlength\parskip{0.25in}
+
+\usepackage{natbib}
+\bibliographystyle{abbrvnat}
+\bibpunct{(}{)}{;}{a}{,}{,}
+
+\usepackage{lscape}
+\usepackage{rotating}
+%\usepackage{multirow}
+\usepackage{rotating,capt-of}
+\usepackage{array}
+
+\usepackage[update,prepend]{epstopdf}
+
+\usepackage[font=sc]{caption}
+
+%NEW COMMANDS
+\newcommand{\Lagr}{\mathcal{L}}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcolumntype{P}[1]{>{\raggedright}p{#1\linewidth}}
+
+%\usepackage{appendix}
+\usepackage{booktabs}
+%\usepackage{cleveref}
+
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[L]{\textsc{Parallel Computing}}
+\fancyhead[R]{\textsc{Working Paper}}
+\fancyfoot[C]{\textsc{\thepage}} %\ of  \pageref{LastPage}
+\fancyfoot[R]{DCC \& GVY}
+
+\begin{document}
+\begin{spacing}{1.25}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Introduction}
+The multilinear regression is the workhorse tool used in a large majority of applied economic work.  Regression analysis is both a powerful and---as the 
+title of \citet{SalaiMartin1997} suggests---ubiquitous method in economics.  However, despite great increases in the efficiency of modern computation and
+considerable advances in the complexity and availability of data, the basic way economists \emph{physically} run regressions has changed little over
+the past decade.  Fundamentally economists rely on the inbuilt ability of statistical programs such as Stata, MATLAB, R and so forth, to project vectors
+of observations onto each other, and hence estimate the coefficients of interest from their underlying equation.
+
+This methodology, whilst completely effective in doing its job, is relatively inefficient when considering both computational and human resources.  The
+delay in calculation time experienced when using large datasets is often considerable, meaning that researchers or their research assistants are forced
+to ``run regressions'' and then wait some non-trivial time to study regression outputs.  Such a process may imply interruption to the economist's ability 
+to undertake research, and at the very least implies tying up the program or computer (or terminal's) analytical capacity whilst the regression ``runs''.  
+
+In this paper we provide a methodology by which the efficiency of multilinear regressions -- and indeed a large range of economic calculations -- can be
+increased by the order of up to XX.  Whilst this methodology is not novel in the physical sciences, corporate enterprises, or even in some iterative economic
+processes (see for example \citeauthor{aldrich2011}, \citeyear{aldrich2011}), we believe that this paper represents its first analysis in terms of linear 
+regression in which its successful(??) application is demonstrated in potentially the most widely used statistical program in applied economics; Stata.  
+
+By taking advantage of parallel computing and \ldots
+
+
+\section{Why Parallel computing?}
+
+\begin{itemize}
+\item Huge data available (specially administrativa data) allow researchers and governments to replicate and inquire deeply in reality. Big data-ware houses are been built every where motive my open-data and transparency movements.
+\item Impressive advances in GPU technologies taking computation into a whole new level through parallel computation. In less than ten years, the computational capabilities of a home computer have multiplied thousands of times\footnote{The new NVIDIA video card for laptos, GeForce GTX 680M, has 1344 cores.} 
+\item Thus, the necessity of making assumptions such as ceteris-paribus is no longer necessary. Researchers can now simulate complete societies from the comfort of their desks just using mid capacity computers.
+\end{itemize}
+
+\section{The Multilinear Regression and Parallel Computing}
+The nature of the matrix algebra employed in multilinear regression means that efficiency gains associated with parallel computing are particularly 
+large relative to traditional single-core computes.  As each variable is expressed as a vector and each of these vectors must be projected onto itself 
+and each other vector (variable), this implies that for each pair of variables $(p,q)$ a stepwise sum must be performed of each observation's coproduct 
+$x_{pi}x_{qi}$, for $i\in \{1,\ldots,n\}$.  In this way, as the number of observations $n$ in a set of data increases, the quantity of individual 
+multiplications must increase in line with this for each pair of variables.
+
+Hence, rather than working stepwise through a summation of $n$ units,\footnote{This is to say first multiplying $x_1$ by $x_1$, then $x_2$
+by $x_2$ and so forth up to $x_n$ by $x_n$, whereby each $x$ is a scalar and the subindex represents observation number.} parallel computing allows 
+us to split each vector and resulting summation into $c$ sub-vectors of $\frac{n}{c}$ observations, where $c$ represents the number of cores which 
+the computer contains in its CPU or GPU:
+\begin{equation}
+\label{eqn:parallelised}
+\sum_{c=1}^C\left(\sum_{i\forall i\in c}^{\frac{n}{c}}x^2_i\right)_c.
+\end{equation}
+Furthermore, given that the process of multiplication and summation suffers from virtually no increasing returns to scale where subsequent
+additions to the vector size imply decreasing marginal additions to calculation time, as $c$ increases in number we expect that the amount of time that
+the regression takes to ``run'' should decrease $c$-fold. 
+
+Formally, each multilinear regression, expressed in terms of a matrix $\vect{X}$ of independent variables and a vector $\vect{y}$ representing the 
+dependent variable, requires two computationally expensive matricial calculations: $\vect{X'X}$ and $\vect{X'y}$, and the subsequent (faster) combination
+of the two resulting matrices to produce the vector of estimands. Given that each individual variable in $\vect{X}$ must be multiplied by itself and
+each other variable in $\vect{X}$ (and likewise for the variable $y$), the summation (\ref{eqn:parallelised}) is performed for each variable pair as
+per (\ref{eqn:OLSMat_b}):
+\begin{subequations}
+\begin{eqnarray}
+\label{eqn:OLSMat}
+\vect{(X'X)}&=& %^{-1}(X'y)
+\begin{bmatrix}
+x_{11} &  x_{12} & \ldots & x_{1n}\\
+x_{21} &  x_{22} & \ldots & x_{2n}\\
+\vdots & \vdots  & \ddots &  \vdots\\
+x_{k1} &  x_{k2} & \ldots & x_{kn}\\
+\end{bmatrix}%_{k\times n}
+\begin{bmatrix}
+x_{11} &  x_{21} & \ldots & x_{k1}\\
+x_{12} &  x_{22} & \ldots & x_{k2}\\
+\vdots & \vdots  & \ddots &  \vdots\\
+x_{1n} &  x_{2n} & \ldots & x_{kn}\\
+\end{bmatrix}\\ \label{eqn:OLSMat_a}
+&\equiv&
+\begin{bmatrix}
+\sum^n_{i=1}x^2_{1i} &  \sum^n_{i=1}x_{1i}x_{2i} & \ldots & \sum^n_{i=1}x_{1i}x_{ki}\\
+\sum^n_{i=1}x_{2i}x_{1i} &  \sum^n_{i=1}x^2_{2i} & \ldots & \sum^n_{i=1}x_{2i}x_{ki}\\
+\vdots & \vdots  & \ddots &  \vdots\\
+\sum^n_{i=1}x_{ki}x_{1i} &  \sum^n_{i=1}x_{ki}x_{2i} & \ldots & \sum^n_{i=1}x^2_{ki}\\
+\end{bmatrix}. \label{eqn:OLSMat_b}
+\end{eqnarray}
+\end{subequations}
+
+\nocite{vespignani2011modelling}
+\newpage
+\bibliography{bibliography.bib}
+
+\end{spacing}
+\end{document}

@@ -10,7 +10,7 @@ void trans(float[100][100], float[100][100], float, float[100], int, float, floa
 float reg(float, float[100], int, float[100][100], float, float[100][100], float[100]);
 void stderror(float, float[100], float, float[100][100], float[100], float[100][100]);
 
-int main()
+int main(int argc, char *argv[])
 {
 	//Setup required vars
 	int i, rows, cols, rows_trans = 0;
@@ -19,10 +19,11 @@ int main()
 	float xx[100][100], xy[100];
 
 	//Enter x variables
-	printf("Enter the number of observations and variables of X\n");
-	scanf("%f%f", &obs_x, &vars_x);
-	printf("Enter the variables\n");
-
+//	printf("Enter the number of observations and variables of X\n");
+//	scanf("%f%f", &obs_x, &vars_x);
+//	printf("Enter the variables\n");
+	float vars_x = argv[1]
+	
 	for (cols = 0 ; cols < vars_x ; cols++)
 		for (rows = 0 ; rows < obs_x ; rows++)
 			scanf("%f", &x[cols][rows]);
@@ -329,6 +330,7 @@ void stderror(float r, float beta[100], float obs_x, float x[100][100], float y[
 	//(1) Calculate x_i'B and ui
 	for(i = 0; i < obs_x; i++)
 	{
+		xbi = 0;
 		for (j = 0; j < r; j++)
 		{	
 			xbi = xbi + beta[j]*x[j][i];
@@ -346,6 +348,7 @@ void stderror(float r, float beta[100], float obs_x, float x[100][100], float y[
 		ubar = ubar + ui[i];
 	}
 	ubar = ubar / obs_x;
+	printf("ubar: %f \n", ubar);
 
 	//(3) Calculate var(u)
 	for(i = 0; i < obs_x; i++)
@@ -359,6 +362,7 @@ void stderror(float r, float beta[100], float obs_x, float x[100][100], float y[
 	{	
 		se[j] = sigma * inv[j][j];
 	}		
+	printf("sigma: %f \n", sigma);
 
 	//(5) Print std. errors
 	printf("Standard Errors:\n");

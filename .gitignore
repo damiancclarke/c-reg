@@ -1,2 +1,11 @@
 *.dta
 *~
+*.aux
+*.bbl
+*.xls
+*.out
+*.exe
+*.pdf
+*.log
+*.blg
+*.gz
